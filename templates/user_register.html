@@ -1,0 +1,21 @@
+{% extends "auth_base.html" %}
+{% block title %}Student Register · NeuroMATCH AI{% endblock %}
+{% block content %}
+<span class="badge badge-green" style="margin-bottom:1.1rem">🎓 Student / Job Seeker</span>
+<h2>Create Account</h2>
+<p class="subtitle">Join NeuroMATCH AI — let AI power your job search.</p>
+<form method="POST">
+  <label>Full Name</label>
+  <input type="text" name="name" placeholder="Aarav Sharma" required autofocus>
+  <label>Email</label>
+  <input type="email" name="email" placeholder="you@email.com" required>
+  <label>Phone (optional)</label>
+  <input type="tel" name="phone" placeholder="+91 99999 00000">
+  <label>Password</label>
+  <input type="password" name="password" placeholder="Min 8 characters" minlength="8" required>
+  <button class="btn btn-primary btn-full" type="submit">Create Account</button>
+</form>
+<p style="text-align:center;margin-top:1.1rem" class="text-sm text-muted">
+  Already registered? <a href="{{ url_for('user_login') }}" class="link">Sign In →</a>
+</p>
+{% endblock %}

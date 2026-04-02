@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rankings · NeuroMATCH AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+.rank-badge{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  font-family:'Syne',sans-serif;font-weight:800;flex-shrink:0}
+.gold  {background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000}
+.silver{background:linear-gradient(135deg,#d1d5db,#9ca3af);color:#000}
+.bronze{background:linear-gradient(135deg,#cd7c43,#92400e);color:#fff}
+.other {background:var(--surf2);color:var(--muted)}
+.podium{display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap}
+.podium-card{flex:1;min-width:180px;padding:1.4rem;border-radius:var(--r);text-align:center;border:1px solid var(--border)}
+.p1{background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(245,158,11,.06));border-color:rgba(251,191,36,.3)}
+.p2{background:linear-gradient(135deg,rgba(209,213,219,.08),rgba(156,163,175,.04));border-color:rgba(156,163,175,.2)}
+.p3{background:linear-gradient(135deg,rgba(205,124,67,.1),rgba(146,64,14,.05));border-color:rgba(205,124,67,.3)}
+</style>
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Neuro<span>MATCH</span></div>
+    <a href="{{ url_for('hr_dashboard') }}" class="nav-link"><span class="icon">🏠</span>Dashboard</a>
+    <a href="{{ url_for('ranking') }}"       class="nav-link active"><span class="icon">🏆</span>Rankings</a>
+    <a href="{{ url_for('post_job') }}"      class="nav-link"><span class="icon">➕</span>Post Job</a>
+    <div style="flex:1"></div>
+    <a href="{{ url_for('logout') }}" class="nav-link"><span class="icon">🚪</span>Logout</a>
+  </aside>
+  <main class="main-content">
+    <div class="topbar">
+      <h1>🏆 Candidate Rankings</h1>
+      <form method="GET" style="display:flex;gap:.6rem;align-items:center">
+        <select name="job_id" onchange="this.form.submit()" style="margin-bottom:0;width:auto;min-width:180px">
+          <option value="">All Jobs</option>
+          {% for j in jobs %}
+          <option value="{{ j.id }}" {% if selected_job==j.id|string %}selected{% endif %}>{{ j.title }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+
+    <!-- Podium top 3 -->
+    {% if candidates|length >= 1 %}
+    <div class="podium">
+      {% for c in candidates[:3] %}
+      <div class="podium-card p{{ loop.index }}">
+        <div style="font-size:1.8rem;margin-bottom:.4rem">{% if loop.index==1 %}🥇{% elif loop.index==2 %}🥈{% else %}🥉{% endif %}</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;
+          color:{% if loop.index==1 %}#fbbf24{% elif loop.index==2 %}#d1d5db{% else %}#cd7c43{% endif %}">
+          {{ c.final_score }}
+        </div>
+        <p style="font-weight:600;margin:.3rem 0">{{ c.uname }}</p>
+        <p class="text-muted text-sm">Score {{ "%.1f"|format(c.score) }} · Match {{ "%.1f"|format(c.match_pct) }}%</p>
+        <span class="badge {% if c.status in ['shortlisted','hired'] %}badge-green{% elif c.status=='rejected' %}badge-red{% else %}badge-orange{% endif %}" style="margin-top:.5rem">
+          {{ c.status }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="section-card">
+      <div class="section-header">
+        <h3>Full Ranking — {{ candidates|length }} candidates</h3>
+        <span class="text-muted text-sm">Formula: Score×0.6 + Match%×0.4</span>
+      </div>
+      <table>
+        <thead><tr><th>Rank</th><th>Candidate</th><th>Final</th><th>Score</th><th>Match%</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        {% for c in candidates %}
+        <tr>
+          <td>
+            <span class="rank-badge {% if c.rank==1 %}gold{% elif c.rank==2 %}silver{% elif c.rank==3 %}bronze{% else %}other{% endif %}">
+              {{ c.rank }}
+            </span>
+          </td>
+          <td><strong>{{ c.uname }}</strong></td>
+          <td><strong style="color:{% if c.final_score>=70 %}var(--accent){% elif c.final_score>=50 %}#fb923c{% else %}#f87171{% endif %}">
+            {{ c.final_score }}</strong></td>
+          <td>{{ "%.1f"|format(c.score) }}</td>
+          <td>{{ "%.1f"|format(c.match_pct) }}%</td>
+          <td><span class="badge {% if c.status in ['shortlisted','hired'] %}badge-green{% elif c.status=='rejected' %}badge-red{% else %}badge-orange{% endif %}">
+            {{ c.status }}</span></td>
+          <td><a href="{{ url_for('candidate_detail', cid=c.id) }}" class="btn btn-sm btn-outline">Detail</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body>
+</html>

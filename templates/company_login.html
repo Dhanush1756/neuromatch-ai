@@ -1,0 +1,19 @@
+{% extends "auth_base.html" %}
+{% block title %}HR Login · NeuroMATCH AI{% endblock %}
+{% block content %}
+<span class="badge badge-purple" style="margin-bottom:1.1rem">🏢 HR / Company</span>
+<h2>HR Portal</h2>
+<p class="subtitle">Sign in to screen resumes and manage your hiring pipeline.</p>
+<form method="POST">
+  <label>Work Email</label>
+  <input type="email" name="email" placeholder="hr@company.com" required autofocus>
+  <label>Password</label>
+  <input type="password" name="password" placeholder="••••••••" required>
+  <button class="btn btn-purple btn-full" type="submit">Sign In as HR</button>
+</form>
+<div class="divider">New company?</div>
+<a href="{{ url_for('company_register') }}" class="btn btn-outline btn-full" style="margin-top:0">Register Company</a>
+<p style="text-align:center;margin-top:1.1rem" class="text-sm text-muted">
+  Student? <a href="{{ url_for('user_login') }}" class="link">Student Login →</a>
+</p>
+{% endblock %}

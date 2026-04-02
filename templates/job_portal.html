@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Job Portal · NeuroMATCH AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:1.2rem 1.4rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:1.5rem}
+.filter-bar .fg{flex:1;min-width:150px}
+.filter-bar input,.filter-bar select{margin-bottom:0}
+.match-mini{height:5px;background:var(--surf2);border-radius:3px;margin-top:.6rem;overflow:hidden}
+.match-mini-fill{height:100%;background:linear-gradient(90deg,var(--accent),#00c896);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Neuro<span>MATCH</span></div>
+    {% if session.get('role')=='user' %}
+    <a href="{{ url_for('user_dashboard') }}" class="nav-link"><span class="icon">🏠</span>Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('job_portal') }}"    class="nav-link active"><span class="icon">💼</span>Browse Jobs</a>
+    <a href="{{ url_for('job_recommend') }}" class="nav-link"><span class="icon">🎯</span>AI Matches</a>
+    <div style="flex:1"></div>
+    <a href="{{ url_for('logout') }}" class="nav-link"><span class="icon">🚪</span>Logout</a>
+  </aside>
+  <main class="main-content">
+    <div class="topbar">
+      <h1>💼 Job & Internship Portal</h1>
+      <span class="badge badge-green">{{ jobs|length }} listings</span>
+    </div>
+
+    <form method="GET" class="filter-bar">
+      <div class="fg">
+        <label>Domain</label>
+        <select name="domain">
+          <option value="">All Domains</option>
+          {% for d in domains %}
+          <option value="{{ d.domain }}" {% if filters.domain==d.domain %}selected{% endif %}>{{ d.domain }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="fg">
+        <label>Location</label>
+        <input type="text" name="location" placeholder="Bangalore, Remote…" value="{{ filters.location }}">
+      </div>
+      <div class="fg">
+        <label>Skill</label>
+        <input type="text" name="skill" placeholder="Python, React…" value="{{ filters.skill }}">
+      </div>
+      <button class="btn btn-primary btn-sm" type="submit" style="height:42px">Filter</button>
+      <a href="{{ url_for('job_portal') }}" class="btn btn-outline btn-sm" style="height:42px;line-height:2">Clear</a>
+    </form>
+
+    {% if jobs %}
+    <div class="job-grid">
+      {% for job in jobs %}
+      <a href="{{ url_for('job_detail', jid=job.id) }}" class="job-card">
+        <div class="flex-between mb-1">
+          <span class="badge badge-blue">{{ job.domain or 'General' }}</span>
+          <span class="badge {% if job.job_type=='Internship' %}badge-orange{% else %}badge-green{% endif %}">{{ job.job_type }}</span>
+        </div>
+        <h3 style="font-size:1rem;margin-bottom:.3rem">{{ job.title }}</h3>
+        <p class="text-muted text-sm mb-1">
+          🏢 {{ job.cname or 'Company' }} &nbsp;·&nbsp; 📍 {{ job.location or 'N/A' }}
+        </p>
+        {% if job.salary %}<p class="text-sm" style="color:var(--accent)">💰 {{ job.salary }}</p>{% endif %}
+        <div class="chips mt-1">
+          {% for sk in (job.skills_required or '').split(',')[:4] %}
+          <span class="chip chip-default">{{ sk.strip() }}</span>
+          {% endfor %}
+        </div>
+        {% if job.get('match_pct') %}
+        <div style="margin-top:.8rem">
+          <div class="flex-between text-sm"><span class="text-muted">Match</span><span style="color:var(--accent)">{{ job.match_pct }}%</span></div>
+          <div class="match-mini"><div class="match-mini-fill" style="width:{{ job.match_pct }}%"></div></div>
+        </div>
+        {% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:4rem;color:var(--muted)">
+      <div style="font-size:3rem;margin-bottom:1rem">🔍</div>
+      <p>No jobs found. <a href="{{ url_for('job_portal') }}" class="link">Clear filters</a></p>
+    </div>
+    {% endif %}
+  </main>
+</div>
+</body>
+</html>

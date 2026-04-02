@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resume Analysis · NeuroMATCH AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+.analysis-hero{background:linear-gradient(135deg,rgba(0,229,176,.08),rgba(123,92,240,.06));
+  border:1px solid rgba(0,229,176,.15);border-radius:var(--r);
+  padding:2rem;margin-bottom:2rem;display:flex;gap:2rem;align-items:center;flex-wrap:wrap}
+.copy-btn{background:none;border:1px solid var(--border);border-radius:6px;
+  color:var(--muted);padding:.3rem .7rem;font-size:.75rem;cursor:pointer}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Neuro<span>MATCH</span></div>
+    <a href="{{ url_for('user_dashboard') }}" class="nav-link"><span class="icon">🏠</span>Dashboard</a>
+    <a href="{{ url_for('job_portal') }}"     class="nav-link"><span class="icon">💼</span>Browse Jobs</a>
+    <a href="{{ url_for('job_recommend') }}"  class="nav-link"><span class="icon">🎯</span>AI Matches</a>
+    <div style="flex:1"></div>
+    <a href="{{ url_for('logout') }}" class="nav-link"><span class="icon">🚪</span>Logout</a>
+  </aside>
+  <main class="main-content">
+    <div class="topbar">
+      <h1>📄 Resume Analysis — {{ resume.filename }}</h1>
+      <a href="{{ url_for('user_dashboard') }}" class="btn btn-outline btn-sm">← Back</a>
+    </div>
+
+    <!-- Score hero -->
+    <div class="analysis-hero">
+      <div style="text-align:center;flex-shrink:0">
+        <div class="score-ring" style="--pct:{{ score.overall }}">
+          <span class="val">{{ score.overall|int }}</span>
+        </div>
+        <p class="text-muted text-sm mt-1">Overall Score</p>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <div style="margin-bottom:.9rem">
+          <div class="flex-between text-sm mb-1"><span>Skills Score</span><span style="color:var(--accent)">{{ score.skills_score|int }}%</span></div>
+          <div class="progress"><div class="progress-fill fill-green" style="width:{{ score.skills_score }}%"></div></div>
+        </div>
+        <div style="margin-bottom:.9rem">
+          <div class="flex-between text-sm mb-1"><span>Education Score</span><span style="color:#a78bfa">{{ score.edu_score|int }}%</span></div>
+          <div class="progress"><div class="progress-fill fill-purple" style="width:{{ score.edu_score }}%"></div></div>
+        </div>
+        <div style="margin-bottom:.9rem">
+          <div class="flex-between text-sm mb-1"><span>Experience Score</span><span style="color:#fb923c">{{ score.exp_score|int }}%</span></div>
+          <div class="progress"><div class="progress-fill fill-orange" style="width:{{ score.exp_score }}%"></div></div>
+        </div>
+        <div>
+          <div class="flex-between text-sm mb-1"><span>Keyword Match %</span><span style="color:var(--accent)">{{ score.keyword_pct }}%</span></div>
+          <div class="progress"><div class="progress-fill fill-green" style="width:{{ score.keyword_pct }}%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Skills -->
+      <div class="section-card">
+        <div class="section-header"><h3>🛠️ Detected Skills ({{ skills|length }})</h3></div>
+        <div style="padding:1.2rem">
+          <div class="chips">
+          {% for s in skills %}
+            {% if s in score.get('premium_skills', []) %}
+              <span class="chip chip-accent">{{ s }}</span>
+            {% elif s in score.get('emerging_skills', []) %}
+              <span class="chip chip-gold">⚡ {{ s }}</span>
+            {% else %}
+              <span class="chip chip-default">{{ s }}</span>
+            {% endif %}
+          {% endfor %}
+          </div>
+          {% if score.get('emerging_skills') %}
+          <p class="text-muted text-sm mt-2">⚡ Gold chips = emerging / future-ready skills</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Strengths / Weaknesses / Gems -->
+      <div>
+        <div class="list-block">
+          <h4>✅ Strengths</h4>
+          {% for s in score.strengths %}<div class="li-row"><span>✅</span><span>{{ s }}</span></div>{% endfor %}
+        </div>
+        <div class="list-block">
+          <h4>⚠️ Areas to Improve</h4>
+          {% for w in score.weaknesses %}<div class="li-row"><span>⚠️</span><span>{{ w }}</span></div>{% endfor %}
+        </div>
+        <div class="list-block">
+          <h4>🔮 Hidden Gems</h4>
+          {% for g in score.hidden_gems %}<div class="li-row"><span>🔮</span><span>{{ g }}</span></div>{% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Interview Questions -->
+    <div class="section-card mt-2">
+      <div class="section-header"><h3>💬 AI-Generated Interview Questions</h3></div>
+      <div style="padding:1.4rem">
+        <ol style="padding-left:1.2rem;line-height:1">
+          {% for q in questions %}
+          <li style="font-size:.9rem;margin-bottom:.8rem;color:var(--text)">{{ q }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div class="section-card mt-2">
+      <div class="section-header">
+        <h3>✉️ Auto-Generated Cover Email</h3>
+        <button class="copy-btn" onclick="copyEmail()">📋 Copy Email</button>
+      </div>
+      <div style="padding:1.2rem">
+        <pre id="emailText" style="white-space:pre-wrap;font-family:inherit;font-size:.88rem;
+          background:var(--surf2);padding:1rem;border-radius:9px;line-height:1.7">{{ email_draft }}</pre>
+      </div>
+    </div>
+
+    <div class="flex gap-2 mt-2">
+      <a href="{{ url_for('job_recommend') }}" class="btn btn-primary">🎯 Find Matching Jobs</a>
+      <a href="{{ url_for('job_portal') }}"    class="btn btn-outline">💼 Browse All Jobs</a>
+    </div>
+  </main>
+</div>
+<script>
+function copyEmail(){
+  navigator.clipboard.writeText(document.getElementById('emailText').innerText);
+  const b=document.querySelector('.copy-btn');b.textContent='✅ Copied!';
+  setTimeout(()=>b.textContent='📋 Copy Email',2000);
+}
+</script>
+</body>
+</html>

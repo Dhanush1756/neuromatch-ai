@@ -1,0 +1,28 @@
+{% extends "auth_base.html" %}
+{% block title %}Company Register · NeuroMATCH AI{% endblock %}
+{% block content %}
+<span class="badge badge-purple" style="margin-bottom:1.1rem">🏢 HR / Company</span>
+<h2>Register Company</h2>
+<p class="subtitle">Set up your account to start AI-powered hiring.</p>
+<form method="POST">
+  <label>Company Name</label>
+  <input type="text" name="company_name" placeholder="Infosys / TCS / Startup Inc." required autofocus>
+  <label>Your Name (HR Contact)</label>
+  <input type="text" name="hr_name" placeholder="Priya Patel" required>
+  <label>Work Email</label>
+  <input type="email" name="email" placeholder="hr@yourcompany.com" required>
+  <label>Industry</label>
+  <select name="industry">
+    <option value="">Select industry</option>
+    <option>Technology</option><option>Finance</option><option>Healthcare</option>
+    <option>E-Commerce</option><option>Manufacturing</option>
+    <option>Education</option><option>Consulting</option><option>Other</option>
+  </select>
+  <label>Password</label>
+  <input type="password" name="password" placeholder="Min 8 characters" minlength="8" required>
+  <button class="btn btn-purple btn-full" type="submit">Register Company</button>
+</form>
+<p style="text-align:center;margin-top:1.1rem" class="text-sm text-muted">
+  Already registered? <a href="{{ url_for('company_login') }}" class="link">Sign In →</a>
+</p>
+{% endblock %}

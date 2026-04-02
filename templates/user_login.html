@@ -1,0 +1,19 @@
+{% extends "auth_base.html" %}
+{% block title %}Student Login · NeuroMATCH AI{% endblock %}
+{% block content %}
+<span class="badge badge-green" style="margin-bottom:1.1rem">🎓 Student / Job Seeker</span>
+<h2>Welcome back</h2>
+<p class="subtitle">Sign in to access your AI career dashboard.</p>
+<form method="POST">
+  <label>Email</label>
+  <input type="email" name="email" placeholder="you@email.com" required autofocus>
+  <label>Password</label>
+  <input type="password" name="password" placeholder="••••••••" required>
+  <button class="btn btn-primary btn-full" type="submit">Sign In</button>
+</form>
+<div class="divider">No account?</div>
+<a href="{{ url_for('user_register') }}" class="btn btn-outline btn-full" style="margin-top:0">Create Account</a>
+<p style="text-align:center;margin-top:1.1rem" class="text-sm text-muted">
+  HR portal? <a href="{{ url_for('company_login') }}" class="link">Company Login →</a>
+</p>
+{% endblock %}

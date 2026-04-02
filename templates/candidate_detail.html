@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ c.uname }} · NeuroMATCH AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Neuro<span>MATCH</span></div>
+    <a href="{{ url_for('hr_dashboard') }}" class="nav-link"><span class="icon">🏠</span>Dashboard</a>
+    <a href="{{ url_for('ranking') }}"       class="nav-link"><span class="icon">🏆</span>Rankings</a>
+    <a href="{{ url_for('post_job') }}"      class="nav-link"><span class="icon">➕</span>Post Job</a>
+    <div style="flex:1"></div>
+    <a href="{{ url_for('logout') }}" class="nav-link"><span class="icon">🚪</span>Logout</a>
+  </aside>
+  <main class="main-content">
+    <div class="topbar">
+      <h1>👤 {{ c.uname }}</h1>
+      <a href="{{ url_for('hr_dashboard') }}" class="btn btn-outline btn-sm">← Back</a>
+    </div>
+
+    <!-- Hero -->
+    <div style="background:linear-gradient(135deg,rgba(123,92,240,.1),rgba(0,229,176,.06));
+      border:1px solid rgba(123,92,240,.2);border-radius:var(--r);
+      padding:1.8rem;margin-bottom:1.5rem;display:flex;gap:2rem;align-items:center;flex-wrap:wrap">
+      <div style="text-align:center">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:3rem;
+          color:{% if c.score>=70 %}var(--accent){% elif c.score>=50 %}#fb923c{% else %}#f87171{% endif %}">
+          {{ "%.1f"|format(c.score) }}
+        </div>
+        <div class="text-muted text-sm">Overall Score</div>
+      </div>
+      <div style="flex:1;line-height:2.2;font-size:.93rem">
+        <p><span class="text-muted">📧 Email:</span> {{ c.uemail }}</p>
+        <p><span class="text-muted">📄 File:</span> {{ c.filename }}</p>
+        <p><span class="text-muted">🎯 Job Match:</span>
+          <span style="color:var(--accent);font-weight:600">{{ "%.1f"|format(c.match_pct) }}%</span></p>
+        <p><span class="text-muted">Status:</span>
+          <span class="badge {% if c.status in ['shortlisted','hired'] %}badge-green{% elif c.status=='rejected' %}badge-red{% else %}badge-orange{% endif %}">
+            {{ c.status }}</span></p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-card">
+          <div class="section-header"><h3>🛠️ Detected Skills ({{ c.skills|length }})</h3></div>
+          <div style="padding:1.2rem">
+            <div class="chips">
+              {% for s in c.skills %}<span class="chip chip-accent">{{ s }}</span>{% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="list-block mt-2">
+          <h4>🔮 Hidden Gems</h4>
+          {% for g in c.hidden_gems %}<div class="li-row"><span>🔮</span><span>{{ g }}</span></div>
+          {% else %}<p class="text-muted text-sm">None detected.</p>{% endfor %}
+        </div>
+      </div>
+      <div>
+        <div class="list-block">
+          <h4>✅ Strengths</h4>
+          {% for s in c.strengths %}<div class="li-row"><span>✅</span><span>{{ s }}</span></div>{% endfor %}
+        </div>
+        <div class="list-block">
+          <h4>⚠️ Areas to Improve</h4>
+          {% for w in c.weaknesses %}<div class="li-row"><span>⚠️</span><span>{{ w }}</span></div>{% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- HR Decision -->
+    <div class="section-card mt-2">
+      <div class="section-header"><h3>📝 HR Decision</h3></div>
+      <div style="padding:1.4rem">
+        {% if c.hr_comment %}
+        <div class="list-block mb-2"><h4>Previous Comment</h4><p class="text-sm">{{ c.hr_comment }}</p></div>
+        {% endif %}
+        <form method="POST" action="{{ url_for('update_status', cid=c.id) }}">
+          <div class="grid-2">
+            <div>
+              <label>Update Status</label>
+              <select name="status">
+                <option value="pending"     {% if c.status=='pending'     %}selected{% endif %}>⏳ Pending</option>
+                <option value="shortlisted" {% if c.status=='shortlisted' %}selected{% endif %}>✅ Shortlisted</option>
+                <option value="rejected"    {% if c.status=='rejected'    %}selected{% endif %}>❌ Rejected</option>
+                <option value="hired"       {% if c.status=='hired'       %}selected{% endif %}>🎉 Hired</option>
+              </select>
+            </div>
+            <div>
+              <label>HR Comment</label>
+              <input type="text" name="comment" placeholder="Add a note…" value="{{ c.hr_comment or '' }}">
+            </div>
+          </div>
+          <button class="btn btn-purple" type="submit">💾 Save Decision</button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

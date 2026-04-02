@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HR Dashboard · NeuroMATCH AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Neuro<span>MATCH</span></div>
+    <a href="{{ url_for('hr_dashboard') }}" class="nav-link active"><span class="icon">🏠</span>Dashboard</a>
+    <a href="{{ url_for('ranking') }}"       class="nav-link"><span class="icon">🏆</span>Rankings</a>
+    <a href="{{ url_for('post_job') }}"      class="nav-link"><span class="icon">➕</span>Post Job</a>
+    <a href="{{ url_for('job_portal') }}"    class="nav-link"><span class="icon">💼</span>Job Portal</a>
+    <div style="flex:1"></div>
+    <span class="badge badge-purple" style="margin:.5rem .8rem">🏢 HR</span>
+    <a href="{{ url_for('logout') }}" class="nav-link"><span class="icon">🚪</span>Logout</a>
+  </aside>
+  <main class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat,msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+
+    <div class="topbar">
+      <div>
+        <h1>HR Dashboard</h1>
+        <p class="text-muted text-sm">{{ company }} &nbsp;·&nbsp; {{ hr }}</p>
+      </div>
+      <span class="badge badge-purple">🏢 HR Portal</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="lbl">Total Candidates</div>
+        <div class="val" style="color:#a78bfa">{{ candidates|length }}</div>
+      </div>
+      {% for s in stats %}
+      <div class="stat-card">
+        <div class="lbl">{{ s.status|title }}</div>
+        <div class="val" style="color:{% if s.status=='shortlisted' or s.status=='hired' %}var(--accent){% elif s.status=='rejected' %}#f87171{% else %}#fb923c{% endif %}">
+          {{ s.cnt }}
+        </div>
+      </div>
+      {% endfor %}
+      <div class="stat-card">
+        <div class="lbl">Jobs Posted</div>
+        <div class="val" style="color:#60a5fa">{{ jobs|length }}</div>
+      </div>
+    </div>
+
+    <!-- Bulk upload -->
+    <div style="background:linear-gradient(135deg,rgba(123,92,240,.1),rgba(91,63,214,.06));
+      border:1px solid rgba(123,92,240,.25);border-radius:var(--r);padding:1.5rem;margin-bottom:1.5rem">
+      <h3 style="margin-bottom:1rem">📂 Bulk Resume Upload &amp; Screen</h3>
+      <form method="POST" action="{{ url_for('bulk_upload') }}" enctype="multipart/form-data">
+        <div class="grid-2">
+          <div>
+            <label>Select Job (optional)</label>
+            <select name="job_id" style="margin-bottom:0">
+              <option value="">— Screen without specific job —</option>
+              {% for j in jobs %}<option value="{{ j.id }}">{{ j.title }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Upload Resumes (PDF/DOCX, multiple OK)</label>
+            <input type="file" name="resumes" multiple accept=".pdf,.docx" style="margin-bottom:0">
+          </div>
+        </div>
+        <button class="btn btn-purple mt-2" type="submit">🚀 Screen All Resumes</button>
+      </form>
+    </div>
+
+    <!-- Candidates table -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3>👥 Screened Candidates ({{ candidates|length }})</h3>
+        <a href="{{ url_for('ranking') }}" class="btn btn-sm btn-outline">🏆 Rankings</a>
+      </div>
+      {% if candidates %}
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Score</th><th>Match%</th><th>Status</th><th>Date</th><th></th></tr></thead>
+        <tbody>
+        {% for c in candidates %}
+        <tr>
+          <td class="text-muted">{{ loop.index }}</td>
+          <td>
+            <strong>{{ c.uname }}</strong><br>
+            <span class="text-muted text-sm">{{ c.uemail }}</span>
+          </td>
+          <td><span class="badge {% if c.score>=70 %}badge-green{% elif c.score>=50 %}badge-orange{% else %}badge-red{% endif %}">
+            {{ "%.1f"|format(c.score) }}</span></td>
+          <td><span class="badge {% if c.match_pct>=60 %}badge-green{% else %}badge-blue{% endif %}">
+            {{ "%.1f"|format(c.match_pct) }}%</span></td>
+          <td><span class="badge {% if c.status in ['shortlisted','hired'] %}badge-green{% elif c.status=='rejected' %}badge-red{% else %}badge-orange{% endif %}">
+            {{ c.status }}</span></td>
+          <td class="text-muted text-sm">{{ c.screened_at[:10] if c.screened_at else '—' }}</td>
+          <td><a href="{{ url_for('candidate_detail', cid=c.id) }}" class="btn btn-sm btn-outline">View</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="padding:3rem;text-align:center;color:var(--muted)">
+        No candidates yet. Upload resumes above to get started.
+      </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+</body>
+</html>

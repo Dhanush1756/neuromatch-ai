@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Dashboard · NeuroMATCH AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Neuro<span>MATCH</span></div>
+    <a href="{{ url_for('user_dashboard') }}" class="nav-link active"><span class="icon">🏠</span>Dashboard</a>
+    <a href="{{ url_for('job_portal') }}"     class="nav-link"><span class="icon">💼</span>Browse Jobs</a>
+    <a href="{{ url_for('job_recommend') }}"  class="nav-link"><span class="icon">🎯</span>AI Matches</a>
+    <div style="flex:1"></div>
+    <span class="badge badge-green" style="margin:.5rem .8rem">🎓 Student</span>
+    <a href="{{ url_for('logout') }}" class="nav-link"><span class="icon">🚪</span>Logout</a>
+  </aside>
+  <main class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat,msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+
+    <div class="topbar">
+      <h1>Welcome, {{ name }}! 👋</h1>
+      <span class="badge badge-green">Student Dashboard</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="lbl">Resumes Uploaded</div>
+        <div class="val" style="color:var(--accent)">{{ resumes|length }}</div>
+        <div class="sub">Total analysed</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Best Score</div>
+        <div class="val" style="color:#a78bfa">
+          {% if resumes %}{{ "%.1f"|format(resumes[0].score) }}{% else %}—{% endif %}
+        </div>
+        <div class="sub">Out of 100</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Profile Status</div>
+        <div class="val" style="font-size:1.2rem;color:#fbbf24">
+          {% if resumes %}✅ Active{% else %}⚠️ Incomplete{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3>📄 Upload Resume</h3>
+        <span class="badge badge-green">PDF / DOCX · Max 5MB</span>
+      </div>
+      <div style="padding:1.5rem">
+        <form method="POST" action="{{ url_for('upload_resume') }}" enctype="multipart/form-data">
+          <div class="upload-zone" id="dz" onclick="document.getElementById('rf').click()">
+            <div class="uz-icon">📂</div>
+            <p id="fn">Click to select or drag & drop your resume</p>
+            <p class="text-sm mt-1">PDF or DOCX accepted</p>
+          </div>
+          <input type="file" id="rf" name="resume" accept=".pdf,.docx" style="display:none"
+            onchange="document.getElementById('fn').textContent=this.files[0]?.name||'File selected'">
+          <button class="btn btn-primary mt-2" type="submit" style="width:auto;padding:.75rem 2.5rem">
+            🚀 Analyse with AI
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Resume history -->
+    {% if resumes %}
+    <div class="section-card">
+      <div class="section-header"><h3>📋 Resume History</h3></div>
+      <table>
+        <thead><tr><th>File</th><th>Score</th><th>Uploaded</th><th></th></tr></thead>
+        <tbody>
+        {% for r in resumes %}
+        <tr>
+          <td>{{ r.filename }}</td>
+          <td><span class="badge {% if r.score>=70 %}badge-green{% elif r.score>=50 %}badge-orange{% else %}badge-red{% endif %}">
+            {{ "%.1f"|format(r.score) }}
+          </span></td>
+          <td class="text-muted text-sm">{{ r.uploaded_at[:10] if r.uploaded_at else '—' }}</td>
+          <td><a href="{{ url_for('resume_result', rid=r.id) }}" class="btn btn-sm btn-outline">View Analysis</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- Quick links -->
+    <div class="grid-2">
+      <a href="{{ url_for('job_portal') }}" class="job-card">
+        <div style="font-size:1.8rem;margin-bottom:.6rem">💼</div>
+        <h3 style="margin-bottom:.4rem">Browse Job Portal</h3>
+        <p class="text-muted text-sm">Find internships filtered by skill, domain, location.</p>
+      </a>
+      <a href="{{ url_for('job_recommend') }}" class="job-card">
+        <div style="font-size:1.8rem;margin-bottom:.6rem">🎯</div>
+        <h3 style="margin-bottom:.4rem">AI Recommendations</h3>
+        <p class="text-muted text-sm">Jobs ranked by how well they match your resume skills.</p>
+      </a>
+    </div>
+  </main>
+</div>
+<script>
+const dz=document.getElementById('dz');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.borderColor='var(--accent)'});
+dz.addEventListener('dragleave',()=>{dz.style.borderColor=''});
+dz.addEventListener('drop',e=>{
+  e.preventDefault();dz.style.borderColor='';
+  const f=e.dataTransfer.files[0];
+  if(f){document.getElementById('rf').files=e.dataTransfer.files;
+        document.getElementById('fn').textContent=f.name}
+});
+</script>
+</body>
+</html>

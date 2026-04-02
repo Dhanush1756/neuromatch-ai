@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ job.title }} · NeuroMATCH AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Neuro<span>MATCH</span></div>
+    {% if session.get('role')=='user' %}
+    <a href="{{ url_for('user_dashboard') }}" class="nav-link"><span class="icon">🏠</span>Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('job_portal') }}"    class="nav-link active"><span class="icon">💼</span>Browse Jobs</a>
+    <a href="{{ url_for('job_recommend') }}" class="nav-link"><span class="icon">🎯</span>AI Matches</a>
+    <div style="flex:1"></div>
+    <a href="{{ url_for('logout') }}" class="nav-link"><span class="icon">🚪</span>Logout</a>
+  </aside>
+  <main class="main-content">
+    <div class="topbar">
+      <h1>{{ job.title }}</h1>
+      <a href="{{ url_for('job_portal') }}" class="btn btn-outline btn-sm">← Back</a>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-card">
+          <div class="section-header">
+            <h3>📋 Job Details</h3>
+            <span class="badge {% if job.job_type=='Internship' %}badge-orange{% else %}badge-green{% endif %}">{{ job.job_type }}</span>
+          </div>
+          <div style="padding:1.4rem;line-height:2.2;font-size:.93rem">
+            <p><span class="text-muted">🏢 Company:</span> &nbsp;{{ job.cname or 'Undisclosed' }}</p>
+            <p><span class="text-muted">📍 Location:</span> &nbsp;{{ job.location or 'N/A' }}</p>
+            <p><span class="text-muted">🏷️ Domain:</span>   &nbsp;{{ job.domain or 'General' }}</p>
+            {% if job.salary %}
+            <p><span class="text-muted">💰 Salary:</span> &nbsp;<span style="color:var(--accent)">{{ job.salary }}</span></p>
+            {% endif %}
+            <p><span class="text-muted">📅 Posted:</span> &nbsp;{{ job.posted_at[:10] if job.posted_at else 'Recently' }}</p>
+          </div>
+        </div>
+        {% if job.description %}
+        <div class="section-card mt-2">
+          <div class="section-header"><h3>📝 Description</h3></div>
+          <div style="padding:1.4rem;font-size:.9rem;line-height:1.8">{{ job.description }}</div>
+        </div>
+        {% endif %}
+      </div>
+      <div>
+        <div class="section-card">
+          <div class="section-header"><h3>🛠️ Required Skills</h3></div>
+          <div style="padding:1.2rem">
+            <div class="chips">
+              {% for sk in (job.skills_required or '').split(',') %}
+              <span class="chip chip-accent">{{ sk.strip() }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        {% if match_score is not none %}
+        <div class="section-card mt-2" style="border-color:{% if match_score>=70 %}rgba(0,229,176,.35){% elif match_score>=40 %}rgba(249,115,22,.35){% else %}rgba(239,68,68,.35){% endif %}">
+          <div class="section-header"><h3>🎯 Your Resume Match</h3></div>
+          <div style="padding:1.4rem;text-align:center">
+            <div style="font-family:'Syne',sans-serif;font-size:3rem;font-weight:800;
+              color:{% if match_score>=70 %}var(--accent){% elif match_score>=40 %}#fb923c{% else %}#f87171{% endif %}">
+              {{ match_score }}%
+            </div>
+            <p class="text-muted text-sm mt-1">
+              {% if match_score>=70 %}🔥 Strong match — highly recommended!
+              {% elif match_score>=40 %}👍 Moderate match — worth applying
+              {% else %}📚 Low match — consider upskilling first{% endif %}
+            </p>
+            <div class="progress mt-2"><div class="progress-fill fill-green" style="width:{{ match_score }}%"></div></div>
+          </div>
+        </div>
+        {% else %}
+        <div class="section-card mt-2">
+          <div style="padding:1.4rem;text-align:center;color:var(--muted)">
+            <p class="mb-2">Upload your resume to see your match score</p>
+            <a href="{{ url_for('user_dashboard') }}" class="btn btn-primary btn-sm">Upload Resume</a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

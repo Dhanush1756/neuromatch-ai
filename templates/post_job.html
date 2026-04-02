@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Post Job · NeuroMATCH AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Neuro<span>MATCH</span></div>
+    <a href="{{ url_for('hr_dashboard') }}" class="nav-link"><span class="icon">🏠</span>Dashboard</a>
+    <a href="{{ url_for('ranking') }}"       class="nav-link"><span class="icon">🏆</span>Rankings</a>
+    <a href="{{ url_for('post_job') }}"      class="nav-link active"><span class="icon">➕</span>Post Job</a>
+    <div style="flex:1"></div>
+    <a href="{{ url_for('logout') }}" class="nav-link"><span class="icon">🚪</span>Logout</a>
+  </aside>
+  <main class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat,msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+    <div class="topbar">
+      <h1>➕ Post a New Job</h1>
+      <a href="{{ url_for('hr_dashboard') }}" class="btn btn-outline btn-sm">← Back</a>
+    </div>
+    <div class="section-card" style="max-width:680px">
+      <div class="section-header"><h3>Job Details</h3></div>
+      <div style="padding:1.6rem">
+        <form method="POST">
+          <div class="grid-2">
+            <div><label>Job Title *</label><input type="text" name="title" placeholder="Python Developer Intern" required></div>
+            <div><label>Location *</label><input type="text" name="location" placeholder="Bangalore / Remote" required></div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <label>Domain *</label>
+              <select name="domain" required>
+                <option value="">Select domain</option>
+                <option>Technology</option><option>Data Science</option><option>AI/ML</option>
+                <option>Design</option><option>Business</option><option>Finance</option>
+                <option>Marketing</option><option>Infrastructure</option><option>Mobile</option><option>Security</option><option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label>Job Type</label>
+              <select name="job_type">
+                <option>Internship</option><option>Full-time</option>
+                <option>Part-time</option><option>Contract</option>
+              </select>
+            </div>
+          </div>
+          <label>Required Skills (comma-separated) *</label>
+          <input type="text" name="skills_required" placeholder="Python, Flask, SQL, REST API, Git" required>
+          <label>Salary / Stipend</label>
+          <input type="text" name="salary" placeholder="15,000–20,000/month">
+          <label>Job Description</label>
+          <textarea name="description" placeholder="Describe the role, responsibilities, and expectations…"></textarea>
+          <button class="btn btn-purple" type="submit" style="padding:.8rem 2.5rem">🚀 Post Job</button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

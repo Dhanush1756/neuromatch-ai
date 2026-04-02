@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Matches · NeuroMATCH AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+.rec-row{display:flex;gap:1.2rem;align-items:center;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--r);padding:1.2rem 1.4rem;
+  margin-bottom:.8rem;text-decoration:none;color:var(--text);transition:border-color .2s}
+.rec-row:hover{border-color:var(--accent)}
+.rank-num{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;flex-shrink:0}
+.r1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000}
+.r2{background:linear-gradient(135deg,#9ca3af,#6b7280);color:#fff}
+.r3{background:linear-gradient(135deg,#cd7c43,#92400e);color:#fff}
+.rn{background:var(--surf2);color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Neuro<span>MATCH</span></div>
+    <a href="{{ url_for('user_dashboard') }}" class="nav-link"><span class="icon">🏠</span>Dashboard</a>
+    <a href="{{ url_for('job_portal') }}"     class="nav-link"><span class="icon">💼</span>Browse Jobs</a>
+    <a href="{{ url_for('job_recommend') }}"  class="nav-link active"><span class="icon">🎯</span>AI Matches</a>
+    <div style="flex:1"></div>
+    <a href="{{ url_for('logout') }}" class="nav-link"><span class="icon">🚪</span>Logout</a>
+  </aside>
+  <main class="main-content">
+    <div class="topbar">
+      <div>
+        <h1>🎯 AI Job Recommendations</h1>
+        <p class="text-muted text-sm">Ranked by semantic resume–job match, {{ name }}</p>
+      </div>
+      <span class="badge badge-green">{{ jobs|length }} jobs ranked</span>
+    </div>
+
+    {% if jobs %}
+    {% for job in jobs %}
+    <a href="{{ url_for('job_detail', jid=job.id) }}" class="rec-row">
+      <div class="rank-num {% if loop.index==1 %}r1{% elif loop.index==2 %}r2{% elif loop.index==3 %}r3{% else %}rn{% endif %}">
+        {{ loop.index }}
+      </div>
+      <div style="flex:1">
+        <h3 style="font-size:.98rem;margin-bottom:.3rem">{{ job.title }}</h3>
+        <p class="text-muted text-sm">
+          🏢 {{ job.cname or 'Company' }} &nbsp;·&nbsp;
+          📍 {{ job.location or 'N/A' }} &nbsp;·&nbsp;
+          <span class="badge badge-blue" style="font-size:.7rem">{{ job.domain or 'General' }}</span>
+        </p>
+        <div class="chips mt-1">
+          {% for sk in (job.skills_required or '').split(',')[:5] %}
+          <span class="chip chip-default">{{ sk.strip() }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;
+          color:{% if job.match_pct>=70 %}var(--accent){% elif job.match_pct>=40 %}#fb923c{% else %}#f87171{% endif %}">
+          {{ job.match_pct }}%
+        </div>
+        <div class="text-muted text-sm">match</div>
+        {% if job.salary %}<div class="text-sm mt-1" style="color:var(--accent)">💰 {{ job.salary }}</div>{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+    {% else %}
+    <div style="text-align:center;padding:4rem;color:var(--muted)">
+      <div style="font-size:3rem;margin-bottom:1rem">🤖</div>
+      <p>No jobs available yet.</p>
+    </div>
+    {% endif %}
+  </main>
+</div>
+</body>
+</html>
