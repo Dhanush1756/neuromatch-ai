@@ -16,3 +16,6 @@ Thumbs.db
 
 # Ignore VS Code settings
 .vscode/
+
+#ignore uploads
+uploads/
